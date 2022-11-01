@@ -1,11 +1,37 @@
+import "../../common/CommonStyle.css"
+
 # 22장 this
 
-- 객체 = 상태를 나타내는 프로퍼티 + 동작을 나타내는 메서드
-- 메서드는 자신이 속한 객체의 상태를 변경할 수 있어야 하며 이 때 프로퍼티를 참조하려면 자신이 속한 객체를 가리키는 식별자를 참조할 수 있어야한다.
-- 생성자함수 경우 인스턴스를 생성하려면 먼저 생성자 함수가 존재 해야하지만 생성자 함수를 정의하기 이전이므로 인스턴스를 가리킬 특수한 식별자가 필요하다.
-- 이를 위해 자바스크립트는 this라는 특수한 식별자를 제공하며, this란 자신이 속한 객체 또는 자신이 생성할 인스턴스를 가리키는 자기 참조 변수다.
-- this는 자바스크립트 엔진에 의해 암묵적으로 생성되며, this가 가리키는 값은 함수 호출 방식에 의해 동적으로 결정된다.
-- this는 상황에 따라 가리키는 대상이 다르다. 호출되는 방식에 따라 this에 바인딩될 값이 동적으로 결정되기 때문이다.
+this를 알아보기 전 객체에 대한 내용을 상기시켜 보자.
+
+객체는 상태를 나타내는 프로퍼티와 동작을 나타내는 메서드를 하나의 논리적인 단위로 묶은 복합적인 자료구조이다.
+
+```javascript
+const circle = {
+  // 프로퍼티: 객체 고유의 상태 데이터
+  radius: 5,
+  // 메서드: 상태 데이터를 참조하고 조작하는 동작
+  getDiameter() {
+    return 2 * circle.radius;
+  },
+};
+
+console.log(circle.getDiameter()); // 10
+```
+
+자신이 속한 객체의 프로퍼티나 메서드를 참조하려면 자신이 속한 객체인 circle을 참조할 수 있어야 한다.  
+위 코드에서 메서드가 호출되는 시점은 객체 리터럴이 circle 변수에 할당되기 이전 평가되고 이후 객체에 할당되어 객체가 생성되었다.  
+하지만 자기 자신이 속한 객체를 재귀적으로 참조하는 방식은 일반적이지 않으며 바람직하지 않다.
+
+ <br>
+
+## this란?
+
+자신이 속한 객체 또는 자신이 생성할 인스턴스를 가리키는<span style="color:Lightseagreen"> **자기 참조 변수이며**</span>, this를 통해 자신이 속한 객체 또는 자신이 생성할 인스턴스의 <span style="color:Lightseagreen">**프로퍼티나 메서드를 참조 할 수 있다.**</span>
+
+ <br>
+
+## 호출에 따라 달라지는 this
 
 ```javascript
 // this는 어디서든지 참조 가능하다.
@@ -38,30 +64,37 @@ function Person(name) {
 const me = new Person("Lee");
 ```
 
-## 함수 호출 방식과 this바인딩
+<br/>
 
-### 일반 함수 호출
+### 함수 호출 방식과 this 바인딩
 
-- 기본적으로 this에는 전역 객체가 바인딩된다. 다만 this는 객체의 프로퍼티나 메서드를 참조하기 위한 자기 참조 변수이므로 객체를 생성하지 않는 일반 함수에서는 의미가 없다.
+함수 호출 방식에 따라 this에 바인딩될 값이 동적으로 결정된다.
 
-- stric mode가 적용된 경우 > undefined
+1. 일반 함수 호출
+2. 메서드 호출
+3. 생성자 함수 호출
+4. function.prototype.apply/call/bind 메서드에 의한 간접 호출
+
+<br/>
+
+#### 🔸 일반 함수 호출
 
 ```javascript
 function foo() {
-  "use strict";
-
-  console.log("foo's this: ", this); // undefined
+  console.log("foo's this: ", this); // window
   function bar() {
-    console.log("bar's this: ", this); // undefined
+    console.log("bar's this: ", this); // window
   }
   bar();
 }
 foo();
 ```
 
-### 메서드 호출
+- 전역함수는 물론 중첩 함수도 this에는 전역 객체가 바인딩된다.
+- 사실, 객체를 생성하지 않는 일반 함수에는 this는 의미가 없다.
+- strict mode가 적용된 일반 함수는 this에서 undefined가 바인딩된다.
 
-- 메서드를 호출할 때는 이름 앞의 마침표 연산자앞에 기술한 객체가 바인딩된다.
+#### 🔸 메서드 호출
 
 ```javascript
 function Person(name) {
@@ -83,13 +116,33 @@ Person.prototype.name = "Kim";
 console.log(Person.prototype.getName()); // ② Kim
 ```
 
-### 생성자 함수 호출
+#### 🔸 생성자 함수 호출
 
-- 생성자 함수 내부의 this에는 생성자 함수가 생성할 인스턴스가 바인딩된다.
+```javascript
+// 생성자 함수
+function Circle(radius) {
+  // 생성자 함수 내부의 this는 생성자 함수가 생성할 인스턴스를 가리킨다.
+  this.radius = radius;
+  this.getDiameter = function () {
+    return 2 * this.radius;
+  };
+}
 
-### Function.prototype.apply/call/bind 메서드에 의한 간접 호출
+// 반지름이 5인 Circle 객체를 생성
+const circle1 = new Circle(5);
+// 반지름이 10인 Circle 객체를 생성
+const circle2 = new Circle(10);
 
-- 모든 함수가 상속받아 사용할 수 있으며 this로 사용할 객체와 인수 리스트를 인수로 전달받아 함수를 호출한다.
+console.log(circle1.getDiameter()); // 10
+console.log(circle2.getDiameter()); // 20
+```
+
+- 이름 그대로 객체(인스턴스)를 생성하는 함수이다.
+- new 연산자와 함께 호출해야 생성자 함수로 동작한다.
+
+#### 🔸 메서드에 의한 간접 호출
+
+- apply, call, bind 메서드는 funtion.prototype의 메서드로 모든 함수가 상속받아 사용할 수 있다.
 
 ```javascript
 function getThisBinding() {
@@ -101,26 +154,10 @@ const thisArg = { a: 1 };
 
 console.log(getThisBinding()); // window
 
-// getThisBinding 함수를 호출하면서 인수로 전달한 객체를 getThisBinding 함수의 this에 바인딩한다.
 console.log(getThisBinding.apply(thisArg)); // {a: 1}
 console.log(getThisBinding.call(thisArg)); // {a: 1}
 ```
 
-- apply와 call 메서드의 본질적인 기능은 함수를 호출하는 것이다.
+- apply와 call 메서드의 본질적인 기능은 함수를 호출하면서 인수로 전달한 객체를 this에 바인딩한다.
 
-```javascript
-function getThisBinding() {
-  return this;
-}
-
-// this로 사용할 객체
-const thisArg = { a: 1 };
-
-// bind 메서드는 첫 번째 인수로 전달한 thisArg로 this 바인딩이 교체된
-// getThisBinding 함수를 새롭게 생성해 반환한다.
-console.log(getThisBinding.bind(thisArg)); // getThisBinding
-// bind 메서드는 함수를 호출하지는 않으므로 명시적으로 호출해야 한다.
-console.log(getThisBinding.bind(thisArg)()); // {a: 1}
-```
-
-- bind메서드는 함수를 호출하지 않고 첫 번째 인수로 전달한 값으로 this 바인딩이 교체된 함수를 새롭게 생성해 반환한다.
+- bind메서드는 메서드의 this와 메서드 내부의 중첩 함수 또는 콜백 함수의 this가 불일치하는 문제를 해결 하기 위해 유용하게 사용된다.
