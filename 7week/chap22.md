@@ -1,5 +1,3 @@
-import "../../common/CommonStyle.css"
-
 # 22장 this
 
 this를 알아보기 전 객체에 대한 내용을 상기시켜 보자.
@@ -27,7 +25,7 @@ console.log(circle.getDiameter()); // 10
 
 ## this란?
 
-자신이 속한 객체 또는 자신이 생성할 인스턴스를 가리키는<span style="color:Lightseagreen"> **자기 참조 변수이며**</span>, this를 통해 자신이 속한 객체 또는 자신이 생성할 인스턴스의 <span style="color:Lightseagreen">**프로퍼티나 메서드를 참조 할 수 있다.**</span>
+자신이 속한 객체 또는 자신이 생성할 인스턴스를 가리키는`자기 참조 변수이며`, this를 통해 자신이 속한 객체 또는 자신이 생성할 인스턴스의 `프로퍼티나 메서드를 참조 할 수 있다.`
 
  <br>
 
